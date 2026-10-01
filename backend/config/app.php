@@ -182,6 +182,11 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+
+
+        // above are all predefined below are my registers
+        App\Providers\AuthenticationServiceProvider::class,
+
         /*
          * Package Service Providers...
          */
