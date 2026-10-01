@@ -1,0 +1,587 @@
+below is my complete architecture of my project  i want you to code it into laravel 10 
+ 
+i want repo pattern into backend with modular monolith architecture into each module eg 
+MODULE 01 AUTHENTICATION
+Tables
+
+users
+roles
+permissions
+role_has_permissions
+model_has_roles
+
+.
+
+also use sanctumApi, SMTP for sending mail to agency owner for set the password so the account can create.
+
+
+
+01. Authentication
+02. User Profiles
+03. Agent / Seller
+04. Travel Services
+05. Destinations
+06. Marketplace
+07. Booking
+08. Payment
+09. Reviews
+10. Messaging
+11. Notifications
+12. Admin
+
+
+
+
+MODULE 01 AUTHENTICATION
+Tables
+
+users
+roles
+permissions
+role_has_permissions
+model_has_roles
+
+Users are:
+
+Customer
+Agent
+Admin 
+
+Example 
+ user =  Rabeet, role = platfrom admin, role-has-permisison =  has all permission 
+ user = Ahmed , role = agent, role-has-permission = only permissions for agencies 
+
+
+
+MODULE 02  USER PROFILES
+Tables
+user_profiles
+user_addresses
+
+Relationship:
+
+users
+  user_profiles
+
+A customer has a profile.
+An agent also has a user account.
+
+
+
+
+MODULE 03  AGENT 
+
+Tables
+agents
+agent_profiles
+
+
+
+Relationship:
+
+users
+   agents
+        agent_profiles
+
+Example:
+
+User
+  Ahmed
+
+Agent
+  Ahmed / ABC Travels
+
+Agent Profile
+  ABC Travels
+  Karachi
+  4.8 rating
+  120 completed bookings
+  verified
+
+
+etc....
+
+
+
+
+MODULE 04 SERVICES
+
+
+01. Table
+services
+
+Each agent can create services.
+
+Example:
+
+Agent Services
+   Umrah Package 
+   Hajj Package
+   Hotel booking in canada 
+   Pakistan to America flight return tickets
+
+Platfrom Services
+  same as agent but here we are providing as platform not an agent.
+
+
+02. Service types
+
+table
+service_categories
+
+Example:
+
+Hotels
+Flights
+Bus Tickets
+Train Tickets
+Tours
+Travel Packages
+Visa Services
+Airport Transfers
+Activities
+
+Then:
+
+services 
+   service_categories
+
+Example:
+
+Hunza 5 Days Tour = service 
+Tours = service_category
+
+
+Karachi to Lahore Train Booking =  Service 
+Train Tickets = service_category
+
+etc....
+
+
+03. Service-specific information
+
+A service could be:
+
+Hotel
+Ticket
+Tour
+Package
+These are details
+
+
+So:
+Table 
+service_information 
+
+For example:
+
+services
+
+id = 101
+title = "5 Days Hunza Tour"
+agent_id = 20
+category_id = TOUR
+price = 75,000
+
+Then:
+
+hunza_tour_services
+
+service_id = 101
+duration_days = 5
+duration_nights = 4
+max_people = 15
+
+now same services but differnt info 
+
+hunza_tour_services
+
+service_id = 101
+duration_days = 10
+duration_nights = 9
+max_people = Only 5
+
+so 1 main service [hunza tour] but differnt info.
+
+
+
+
+
+MODULE 05  DESTINATIONS
+
+This is separate because many services can target the same destination.
+
+Tables
+countries
+cities
+destinations
+
+Relationship:
+
+country
+   cities
+         destinations
+
+Then:
+
+services
+    destination_id
+
+Example:
+
+Hunza Tour = service name 
+Hunza = destination
+
+
+
+
+
+MODULE 06 MARKETPLACE
+
+Our homepage/search system.
+
+Marketplace searches:
+
+services
+agents
+destinations
+categories
+
+Customer can search:
+
+"hunza"
+
+Results:
+
+ABC Travels
+4.8 rating
+Hunza 5 Days Tour
+Rs. 75,000
+
+
+XYZ Travels
+3.7 rating
+Hunza Family Tour
+Rs. 82,000
+
+
+Platform
+Hunza Premium Tour
+Rs. 90,000
+
+
+
+
+
+MODULE 07 BOOKING
+
+Tables
+bookings
+
+id
+booking_number
+customer_id
+service_id
+agent_id
+quantity
+price
+status
+start_date
+end_date
+
+Then:
+
+Customer    
+   Service 
+       Agent
+           Booking
+
+Example:
+
+Customer: Ali
+
+Service:
+"Hunza 5 Days Tour"
+
+Seller:
+ABC Travels
+
+Price:
+Rs. 75,000
+
+Booking:
+TRV-00001
+
+
+
+
+01. platform services
+
+Customer can buy:
+
+ABC Travels' service
+
+or:
+
+PLATFORM'S service
+
+So booking needs to identify who provided the service.
+
+so we use provider,
+
+provider_id
+provider_type
+
+Example:
+
+booking
+
+customer_id = 50
+
+provider_type = Agent
+provider_id = 12
+
+service_id = 100
+
+or:
+
+booking
+
+customer_id = 50
+
+provider_type = Platform
+provider_id = 1
+
+service_id = 200
+
+This makes platform itself a seller.
+
+
+
+
+
+
+MODULE 08 PAYMENT
+
+Customer pays our platform.
+
+CUSTOMER pays
+    Rs. 75,000
+   
+PLATFORM
+   Platform commission
+   Agent earnings
+
+
+Tables
+payments
+transactions
+refunds
+agent_earnings
+agent_payouts
+
+Example:
+
+Booking
+Rs. 100,000
+
+Platform commission 2%
+Rs. 2000
+
+Agent earning
+Rs. 98,000
+
+The agent doesn't necessarily receive the customer's payment directly.
+
+
+
+
+
+MODULE 09 REVIEWS
+
+
+Customer completes booking:
+
+Booking
+  Completed
+      Review 
+
+
+Tables
+reviews
+review_replies
+
+Review belongs to:
+
+customer
+service
+agent
+booking
+
+
+reviews
+customer_id
+service_id
+booking_id
+rating
+comment
+
+Example:
+
+customer Ahmed
+4.3 rating to ABC travels 
+"Excellent Hunza tour."
+
+
+customer Ali
+4.8 rating to platfrom
+"Excellent Umrah Package by platform."
+
+
+
+
+
+
+
+
+MODULE 10 MESSAGING
+
+
+If a customer wants to ask:
+
+"Can you arrange a private car?"
+
+They should be able to message the agent.
+
+Tables
+conversations
+conversation_participants
+messages
+message_attachments
+
+Relationship:
+
+Customer
+     │
+Conversation
+     │
+     -Customer
+     - Agent
+          │
+       Messages
+
+
+
+
+
+MODULE 11  NOTIFICATIONS
+Tables
+notifications
+notification_preferences
+
+Events:
+
+New booking
+New message
+Payment
+Booking accepted
+Booking cancelled
+New review
+Payout
+
+
+
+
+
+MODULE 12  ADMIN
+
+Admin controls the application
+
+Tables
+settings
+agent_verifications
+service_reports
+booking_reports
+activity_logs
+
+Admin can:
+
+create agent by setting its agency name and email and send mail through SMTP when agent set password agent user account
+will be create
+Verify documents
+Suspend agent
+Hide service
+Feature service
+Handle disputes
+Manage commissions per-categrory or per-agent
+Manage bookings
+Manage refunds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Core Tables
+
+
+Identity
+users
+roles
+permissions
+
+
+Agents
+agents
+agent_profiles
+
+
+Marketplace
+service_categories
+services
+service_information
+
+
+Destinations
+countries
+cities
+destinations
+
+
+Booking
+bookings
+booking_status_and_history
+
+
+Finance
+payments
+transactions
+refunds
+agent_earnings
+agent_payouts
+
+
+Marketplace trust
+reviews
+review_replies
+
+
+Communication
+conversations
+conversation_participants
+messages
+message_attachments
+
+
+System
+notifications
+settings
+activity_logs
